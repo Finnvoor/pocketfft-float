@@ -18,15 +18,15 @@
 
 #define maxlen 8192
 
-static void fill_random (double *data, size_t length)
+static void fill_random (float *data, size_t length)
   {
   for (size_t m=0; m<length; ++m)
     data[m] = rand()/(RAND_MAX+1.0)-0.5;
   }
 
-static double errcalc (double *data, double *odata, size_t length)
+static float errcalc (float *data, float *odata, size_t length)
   {
-  double sum = 0, errsum = 0;
+  float sum = 0, errsum = 0;
   for (size_t m=0; m<length; ++m)
     {
     errsum += (data[m]-odata[m])*(data[m]-odata[m]);
@@ -37,19 +37,19 @@ static double errcalc (double *data, double *odata, size_t length)
 
 static int test_real(void)
   {
-  double data[maxlen], odata[maxlen];
-  const double epsilon=2e-15;
+  float data[maxlen], odata[maxlen];
+  const float epsilon=2e-6;
   int ret = 0;
   fill_random (odata, maxlen);
-  double errsum=0;
+  float errsum=0;
   for (int length=1; length<=maxlen; ++length)
     {
-    memcpy (data,odata,length*sizeof(double));
+    memcpy (data,odata,length*sizeof(float));
     rfft_plan plan = make_rfft_plan (length);
     rfft_forward (plan, data, 1.);
     rfft_backward (plan, data, 1./length);
     destroy_rfft_plan (plan);
-    double err = errcalc (data, odata, length);
+    float err = errcalc (data, odata, length);
     if (err>epsilon)
       {
       printf("problem at real length %i: %e\n",length,err);
@@ -63,19 +63,19 @@ static int test_real(void)
 
 static int test_complex(void)
   {
-  double data[2*maxlen], odata[2*maxlen];
+  float data[2*maxlen], odata[2*maxlen];
   fill_random (odata, 2*maxlen);
-  const double epsilon=2e-15;
+  const float epsilon=2e-6;
   int ret = 0;
-  double errsum=0;
+  float errsum=0;
   for (int length=1; length<=maxlen; ++length)
     {
-    memcpy (data,odata,2*length*sizeof(double));
+    memcpy (data,odata,2*length*sizeof(float));
     cfft_plan plan = make_cfft_plan (length);
     cfft_forward(plan, data, 1.);
     cfft_backward(plan, data, 1./length);
     destroy_cfft_plan (plan);
-    double err = errcalc (data, odata, 2*length);
+    float err = errcalc (data, odata, 2*length);
     if (err>epsilon)
       {
       printf("problem at complex length %i: %e\n",length,err);
